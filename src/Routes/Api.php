@@ -3,9 +3,9 @@
 Route::post('/account', 'AccountController@create');
 
 Route::group(['middleware' => ['authentication']], function () {
-    Route::get('/account/{accountID}', 'AccountController@read');
-    Route::put('/account/{accountID}', 'AccountController@update');
-    Route::delete('/account/{accountID}', 'AccountController@delete');
+    Route::get('/account/{accountGUID}', 'AccountController@read');
+    Route::put('/account/{accountGUID}', 'AccountController@update');
+    Route::delete('/account/{accountGUID}', 'AccountController@delete');
 });
 
 

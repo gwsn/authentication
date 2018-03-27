@@ -24,6 +24,13 @@ class Account extends Model {
         'password',
     ];
 
+    /**
+     * The attributes that aren't mass assignable.
+     *
+     * @var array
+     */
+    protected $guarded = [];
+
 
     /**
      * @param array $data
@@ -33,10 +40,21 @@ class Account extends Model {
      */
     public function createAccount( Array $data = [] ) {
         $data = $this->sanitize( $data );
+        $this->validateLogin($data);
         $this->validateAccount( $data );
-        $data['accountID'] = Uuid::create();
 
-        $this->save($data);
+        $data['accountGUID'] = Uuid::create();
+        $data['password'] = bcrypt($data['password']);
+
+        $account = Account::where('email', $data['email']);
+
+        if($account) {
+            throw new \InvalidArgumentException("User already exists");
+        }
+
+        $account = new Account();
+        $account->fill($data);
+        $account->save();
 
         return $this->toArray();
     }
@@ -47,23 +65,17 @@ class Account extends Model {
      * @return array
      * @throws \InvalidArgumentException
      */
-    public function readAccount( $username = null, Array $data = [] ) {
+    public function readAccount( $accountGUID = null, Array $data = [] ) {
 
-        return [
-            "accountID"   => 21,
-            "clientID"    => 25,
-            "displayName" => "J.N. Overmars",
-            "email"       => "jovermars@bizhost.nl",
-            "password"    => "Secret!",
-            "gender"      => "male",
-            "firstName"   => "Jurn",
-            "insertion"   => "",
-            "surname"     => "Overmars",
-            "salutation"  => "Dhr.",
-            "phone"       => "085 3010884",
-            "mobile"      => "06 13322424",
-            "loginType"   => "basic_auth",
-        ];
+        // check the accountGUID of the logged in user;
+
+        $account = Account::where('accountGUID', $accountGUID)->where('deleted_at', NULL)->where('disabled', 0);
+
+        if($account) {
+            return $account;
+        }
+
+        return [];
     }
 
     /**
@@ -72,25 +84,15 @@ class Account extends Model {
      * @return array
      * @throws \InvalidArgumentException
      */
-    public function updateAccount( $username = null, Array $data = [] ) {
+    public function updateAccount( $accountGUID = null, Array $data = [] ) {
         $data = $this->sanitize( $data );
         $this->validateAccount( $data );
 
-        return [
-            "accountID"       => 21,
-            "clientID"        => 25,
-            "displayName"     => "J.N. Overmars",
-            "email"           => "jovermars@bizhost.nl",
-            "password"        => "Secret!",
-            "gender"          => "male",
-            "firstName"       => "Jurn",
-            "insertion"       => "",
-            "surname"         => "Overmars",
-            "salutation"      => "Dhr.",
-            "phone"           => "085 3010884",
-            "mobile"          => "06 13322424",
-            "loginType"       => "basic_auth"
-        ];
+        $account = Account::where('accountGUID', $accountGUID)->where('deleted_at', NULL)->where('disabled', 0);
+        $account->fill($data);
+        $account->save();
+
+        return $account;
     }
 
     /**
@@ -99,7 +101,17 @@ class Account extends Model {
      * @return array
      * @throws \InvalidArgumentException
      */
-    public function deleteAccount( $username = null, Array $data = [] ) {
+    public function deleteAccount( $accountGUID = null, Array $data = [] ) {
+        // check the accountGUID of the logged in user;
+
+        $account = Account::where('accountGUID', $accountGUID)->where('deleted_at', NULL)->where('disabled', 0);
+
+        if($account) {
+            $account->delete();
+            return true;
+        }
+
+
         return [];
     }
 
@@ -175,8 +187,6 @@ class Account extends Model {
             }
         }
 
-        // validate the email and password
-        $this->validateLogin($data);
 
         // Check if displayName is regex [a-zA-Z0-9]
         if ( preg_match( $nameRegex, $data['displayName'], $matches ) !== 1 ) {
@@ -281,7 +291,6 @@ class Account extends Model {
     private function throwInvalidException( $key = null, $msg = "is not matching the requirements" ) {
         throw new \InvalidArgumentException(  $key  . " => " . $msg, 1 );
     }
-
     /**
      * Get the relationships for the entity.
      *
