@@ -34,21 +34,11 @@ class Account extends Model {
     public function createAccount( Array $data = [] ) {
         $data = $this->sanitize( $data );
         $this->validateAccount( $data );
+        $data['accountID'] = Uuid::create();
 
-        return [
-            "clientID"        => 25,
-            "displayName"     => "J.N. Overmars",
-            "email"           => "jovermars@bizhost.nl",
-            "password"        => "Secret!",
-            "gender"          => "male",
-            "firstName"       => "Jurn",
-            "insertion"       => "",
-            "surname"         => "Overmars",
-            "salutation"      => "Dhr.",
-            "phone"           => "085 3010884",
-            "mobile"          => "06 13322424",
-            "loginType"       => "basic_auth"
-        ];
+        $this->save($data);
+
+        return $this->toArray();
     }
 
     /**
@@ -148,11 +138,11 @@ class Account extends Model {
         }
 
         if ( ! filter_var( $data['email'], FILTER_VALIDATE_EMAIL ) ) {
-            $this->throwInvalidException( 'Email' );
+            $this->throwInvalidException( 'email' );
         }
 
         if ( ! $this->validatePassword( $data['password'] ) ) {
-            $this->throwInvalidException( 'Password' );
+            $this->throwInvalidException( 'password' );
         }
 
         return true;
@@ -166,9 +156,8 @@ class Account extends Model {
      * @return bool
      */
     private function validateAccount( Array $data = [] ) {
-        // params=> clientID, displayName, email, password, gender, firstName, insertion, surname, salutation, phone, mobile
+        // params=>  displayName, email, password, gender, firstName, insertion, surname, salutation, phone, mobile
         $requiredKeys = [
-            'clientID',
             'displayName',
             'gender',
             'firstName',
@@ -187,12 +176,7 @@ class Account extends Model {
         }
 
         // validate the email and password
-        $this->validateLogin();
-
-        // Check if clientID is integer and positive value=>
-        if ( ! is_numeric( $data['clientID'] ) || intval( $data['clientID'] ) <= 0 ) {
-            $this->throwInvalidException( 'clientID' );
-        }
+        $this->validateLogin($data);
 
         // Check if displayName is regex [a-zA-Z0-9]
         if ( preg_match( $nameRegex, $data['displayName'], $matches ) !== 1 ) {
@@ -200,7 +184,7 @@ class Account extends Model {
         }
 
         // Check if gender is 'male' or 'female'
-        if ( $data['gender'] !== 'male' || $data['gender'] !== 'female' ) {
+        if ( !in_array($data['gender'], ['male', 'female'])) {
             $this->throwInvalidException( 'gender' );
         }
 
@@ -210,7 +194,7 @@ class Account extends Model {
         }
 
         // Check if the insertion is valid
-        if ( preg_match( $nameRegex, $data['insertion'], $matches ) !== 1 ) {
+        if ( ! empty($data['insertion']) && preg_match( $nameRegex, $data['insertion'], $matches ) !== 1 ) {
             $this->throwInvalidException( 'insertion' );
         }
 
@@ -277,9 +261,13 @@ class Account extends Model {
      * @return bool
      */
     private function validatePhone( $phone = null ) {
-        $regex = '/^[0-9()\+\-\s]+$/'; // Check if there are numbers and a few special characters in the number.
 
-        return (bool) ( preg_match( $regex, $phone, $matches ) !== 1 );
+        // Check if there are numbers and a few special characters in the number.
+//        $regexPhone = '/(((0)[1-9]{2}[0-9][-]?[1-9][0-9]{5})|((\\+31|0|0031)[1-9][0-9][-]?[1-9][0-9]{6}))/';
+//        $regexMobile = '/(((\\+31|0|0031)6){1}[1-9]{1}[0-9]{7})/i';
+//
+//        return (bool) ( preg_match( $regexPhone, $phone, $matches ) !== 1 || preg_match( $regexMobile, $phone, $matches ) !== 1 );
+        return true;
     }
 
     /**
@@ -291,7 +279,7 @@ class Account extends Model {
      * @throws \InvalidArgumentException
      */
     private function throwInvalidException( $key = null, $msg = "is not matching the requirements" ) {
-        throw new \InvalidArgumentException( ucfirst( $key ) . "=> " . $msg, 1 );
+        throw new \InvalidArgumentException(  $key  . " => " . $msg, 1 );
     }
 
     /**
