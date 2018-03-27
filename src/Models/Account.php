@@ -13,6 +13,8 @@ use Illuminate\Database\Eloquent\Model;
 class Account extends Model {
 
 
+    protected $table = 'accounts';
+
     /**
      * The attributes excluded from the model's JSON form.
      *
@@ -29,7 +31,7 @@ class Account extends Model {
      * @return array
      * @throws \InvalidArgumentException
      */
-    public function createAccount( $username = null, Array $data = [] ) {
+    public function createAccount( Array $data = [] ) {
         $data = $this->sanitize( $data );
         $this->validateAccount( $data );
 
