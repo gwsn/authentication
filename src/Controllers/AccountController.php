@@ -2,6 +2,7 @@
 namespace Gwsn\Authentication\Controllers;
 
 use Gwsn\Authentication\Models\Account;
+use Gwsn\Authentication\Models\AuthenticateService;
 use Gwsn\Rest\BaseController;
 use Illuminate\Http\Request;
 
@@ -19,6 +20,37 @@ class AccountController extends BaseController {
      */
     public function __construct() {
         $this->account = new Account();
+    }
+
+    /**
+     * @param Request $request
+     *
+     * @return mixed
+     */
+    public function login( Request $request ) {
+        try {
+            $authHeader = $request->header('Authorization', null);
+
+            $user = $request->input('user', null);
+            $pass = $request->input('pass', null);
+
+            $authenticateService = new AuthenticateService($request);
+
+            // Check if Authenticate headers are set and if the base64(username:password) exists
+            if($authenticateService->checkBasicAuth($authHeader) === false && $authenticateService->checkLogin($user, $pass) === false) {
+                return response('Unauthorized.', 401);
+            }
+
+            return $this->response($request, [],[], 204);
+
+        }
+        catch ( \InvalidArgumentException $e ) {
+            return $this->failedResponse( $request, $e->getMessage(), 400 );
+        }
+        catch ( \Exception $e ) {
+            return $this->failedResponse( $request, $e->getMessage(), 500 );
+        }
+
     }
 
     /**
