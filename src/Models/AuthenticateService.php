@@ -72,6 +72,32 @@ class AuthenticateService {
 
 
     /**
+     * @param string $user
+     * @param string $pass
+     *
+     * @return bool
+     */
+    public function checkLogin(string $user = null, string $pass = null) {
+
+        $this->setUser($user)->setPass($pass);
+
+        try {
+            if($this->authenticate->userLogin($this->getUser(), $this->getPass())) {
+                $this->sendEvent('authenticate', ['status' => true]);
+                return true;
+            }
+        } catch(UnauthorizedException $exception) {
+
+        } catch(\Exception $exception) {
+
+        }
+
+        $this->sendEvent('authenticate', ['status' => false]);
+        return false;
+    }
+
+
+    /**
      * @param $authHeader
      *
      * @return bool
