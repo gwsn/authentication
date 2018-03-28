@@ -31,8 +31,8 @@ class AccountController extends BaseController {
         try {
             $authHeader = $request->header('Authorization', null);
 
-            $user = $request->input('user', null);
-            $pass = $request->input('pass', null);
+            $user = $request->input('email', $request->input('user', null));
+            $pass = $request->input('password', $request->input('pass', null));
 
             $authenticateService = new AuthenticateService($request);
 
@@ -41,7 +41,11 @@ class AccountController extends BaseController {
                 return response('Unauthorized.', 401);
             }
 
-            return $this->response($request, [],[], 204);
+            // Clear response
+            $request->replace([]);
+
+
+            return $this->response($request, []);
 
         }
         catch ( \InvalidArgumentException $e ) {

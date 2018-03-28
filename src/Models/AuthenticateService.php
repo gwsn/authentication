@@ -78,10 +78,10 @@ class AuthenticateService {
      * @return bool
      */
     public function checkLogin(string $user = null, string $pass = null) {
-
-        $this->setUser($user)->setPass($pass);
-
         try {
+
+            $this->setUser($user)->setPass($pass);
+
             if($this->authenticate->userLogin($this->getUser(), $this->getPass())) {
                 $this->sendEvent('authenticate', ['status' => true]);
                 return true;
@@ -106,14 +106,15 @@ class AuthenticateService {
         $user = null;
         $pass = null;
 
-        if (strpos(strtolower($authHeader),'basic') !== 0)
-            return false;
-
-        list($user, $pass) = explode(':', base64_decode(substr($authHeader, 6)));
-
-        $this->setUser($user)->setPass($pass);
-
         try {
+            if (strpos(strtolower($authHeader),'basic') !== 0)
+                return false;
+
+            list($user, $pass) = explode(':', base64_decode(substr($authHeader, 6)));
+
+            $this->setUser($user)->setPass($pass);
+
+
             if($this->authenticate->userLogin($this->getUser(), $this->getPass())) {
                 $this->sendEvent('authenticate', ['status' => true]);
                 return true;
