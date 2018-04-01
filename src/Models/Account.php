@@ -45,7 +45,6 @@ class Account extends Model {
         $this->validateAccount( $data );
 
         $data['accountGUID'] = Uuid::create();
-        $data['password'] = bcrypt($data['password']);
 
         $account = Account::where('email', $data['email']);
 
@@ -56,6 +55,7 @@ class Account extends Model {
 
         $account = new Account();
         $account->fill($data);
+        $account->password = bcrypt($data['password']);
         $account->save();
 
         return $account->toArray();
