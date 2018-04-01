@@ -21,6 +21,7 @@ class Account extends Model {
      * @var array
      */
     protected $hidden = [
+        'id',
         'password',
     ];
 
@@ -29,7 +30,7 @@ class Account extends Model {
      *
      * @var array
      */
-    protected $guarded = [];
+    protected $guarded = ['password'];
 
 
     /**
@@ -48,7 +49,8 @@ class Account extends Model {
 
         $account = Account::where('email', $data['email']);
 
-        if($account) {
+
+        if($account->count() > 0) {
             throw new \InvalidArgumentException("User already exists");
         }
 
@@ -56,22 +58,20 @@ class Account extends Model {
         $account->fill($data);
         $account->save();
 
-        return $this->toArray();
+        return $account->toArray();
     }
 
     /**
+     * @param string $accountGUID
      * @param array $data
      *
      * @return array
      * @throws \InvalidArgumentException
      */
-    public function readAccount( $accountGUID = null, Array $data = [] ) {
-
-        // check the accountGUID of the logged in user;
-
+    public function readAccount( $accountGUID = null ) {
         $account = Account::where('accountGUID', $accountGUID)->where('deleted_at', NULL)->where('disabled', 0);
 
-        if($account) {
+        if($account->count() > 0) {
             return $account;
         }
 
@@ -79,6 +79,7 @@ class Account extends Model {
     }
 
     /**
+     * @param string $accountGUID
      * @param array $data
      *
      * @return array
@@ -89,6 +90,11 @@ class Account extends Model {
         $this->validateAccount( $data );
 
         $account = Account::where('accountGUID', $accountGUID)->where('deleted_at', NULL)->where('disabled', 0);
+        if($account->count() === 0) {
+            throw new \InvalidArgumentException("User not exists");
+        }
+
+        $account = $account->first();
         $account->fill($data);
         $account->save();
 
@@ -96,23 +102,44 @@ class Account extends Model {
     }
 
     /**
+     * @param string $accountGUID
+     *
+     * @return array
+     * @throws \InvalidArgumentException
+     */
+    public function deleteAccount( $accountGUID = null ) {
+        $account = Account::where('accountGUID', $accountGUID)->where('deleted_at', NULL)->where('disabled', 0);
+
+        if($account->count() !== 1) {
+            throw new \InvalidArgumentException("User not exists");
+        }
+
+        $account = $account->first();
+        $account->delete();
+        return true;
+    }
+
+    /**
+     * @param string $accountGUID
      * @param array $data
      *
      * @return array
      * @throws \InvalidArgumentException
      */
-    public function deleteAccount( $accountGUID = null, Array $data = [] ) {
-        // check the accountGUID of the logged in user;
+    public function changePassword( $accountGUID = null, Array $data = [] ) {
+        $this->validatePassword( $data['password'] );
 
         $account = Account::where('accountGUID', $accountGUID)->where('deleted_at', NULL)->where('disabled', 0);
 
-        if($account) {
-            $account->delete();
-            return true;
+        if($account->count() !== 1) {
+            throw new \InvalidArgumentException("User not exists");
         }
 
+        $account = $account->first();
+        $account->password = bcrypt($data['password']);
+        $account->save();
 
-        return [];
+        return true;
     }
 
     /**
@@ -124,6 +151,8 @@ class Account extends Model {
 
         // Sanitize phone numbers
         // @todo
+
+        $data['gender'] = (empty($data['gender']) ? 'male' : $data['gender']);
 
         return $data;
     }
@@ -168,6 +197,7 @@ class Account extends Model {
      * @return bool
      */
     private function validateAccount( Array $data = [] ) {
+        return true;
         // params=>  displayName, email, password, gender, firstName, insertion, surname, salutation, phone, mobile
         $requiredKeys = [
             'displayName',

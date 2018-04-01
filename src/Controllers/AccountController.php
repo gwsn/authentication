@@ -5,6 +5,8 @@ use Gwsn\Authentication\Models\Account;
 use Gwsn\Authentication\Models\AuthenticateService;
 use Gwsn\Rest\BaseController;
 use Illuminate\Http\Request;
+use Illuminate\Validation\UnauthorizedException;
+use Symfony\Component\Routing\Exception\MethodNotAllowedException;
 
 /**
  * Class AccountController
@@ -34,10 +36,10 @@ class AccountController extends BaseController {
             $user = $request->input('email', $request->input('user', null));
             $pass = $request->input('password', $request->input('pass', null));
 
-            $authenticateService = new AuthenticateService($request);
+            $authService = new AuthenticateService($request);
 
             // Check if Authenticate headers are set and if the base64(username:password) exists
-            if($authenticateService->checkBasicAuth($authHeader) === false && $authenticateService->checkLogin($user, $pass) === false) {
+            if($authService->checkBasicAuth($authHeader) === false && $authService->checkLogin($user, $pass) === false) {
                 return response('Unauthorized.', 401);
             }
 
@@ -45,7 +47,7 @@ class AccountController extends BaseController {
             $request->replace([]);
 
 
-            return $this->response($request, []);
+            return $this->response($request, ['user' => $authService->getAuthenticatedUser()->accountGUID]);
 
         }
         catch ( \InvalidArgumentException $e ) {
@@ -65,7 +67,10 @@ class AccountController extends BaseController {
     public function create( Request $request ) {
         try {
 
-            $response = $this->account->createAccount( $request->all() );
+            $response = $this->account->createAccount( $request->except('authUser') );
+
+            // Clear response
+            $request->replace([]);
 
             return $this->response( $request, $response );
 
@@ -88,8 +93,9 @@ class AccountController extends BaseController {
      */
     public function read( Request $request, $username ) {
         try {
+            $this->validateUser($request, $username);
 
-            $response = $this->account->readAccount( $username, $request->all() );
+            $response = $this->account->readAccount( $username );
 
             return $this->response( $request, $response );
 
@@ -111,8 +117,9 @@ class AccountController extends BaseController {
      */
     public function update( Request $request, $username ) {
         try {
+            $this->validateUser($request, $username);
 
-            $response = $this->account->updateAccount( $username, $request->all() );
+            $response = $this->account->updateAccount( $username, $request->except('authUser', 'password') );
 
             return $this->response( $request, $response );
 
@@ -135,8 +142,36 @@ class AccountController extends BaseController {
      */
     public function delete( Request $request, $username ) {
         try {
+            $this->validateUser($request, $username);
 
-            $response = $this->account->deleteAccount( $username, $request->all() );
+            $response = $this->account->deleteAccount( $username );
+
+            return $this->response( $request, $response );
+
+        }
+        catch ( \InvalidArgumentException $e ) {
+            return $this->failedResponse( $request, $e->getMessage(), 400 );
+
+        }
+        catch ( \Exception $e ) {
+            return $this->failedResponse( $request, $e->getMessage(), 500 );
+        }
+    }
+
+    /**
+     * @param Request $request
+     * @param string  $username
+     *
+     * @return mixed
+     */
+    public function changePassword( Request $request, $username ) {
+        try {
+            $this->validateUser($request, $username);
+
+            $response = $this->account->changePassword( $username, ['password' => $request->input('password', null)] );
+
+            // Clear response
+            $request->replace([]);
 
             return $this->response( $request, $response );
 
@@ -155,6 +190,15 @@ class AccountController extends BaseController {
      *
      */
     public function dummyDataUser() {
+
+    }
+
+    private function validateUser(Request $request, $username) {
+        if($request->get('authUser', null) !== $username) {
+            throw new \InvalidArgumentException("This account has not the correct privileges to do this action");
+        }
+
+        return true;
 
     }
 }

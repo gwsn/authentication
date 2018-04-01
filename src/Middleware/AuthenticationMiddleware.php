@@ -18,12 +18,15 @@ class AuthenticationMiddleware
     public function handle($request, Closure $next)
     {
         $authHeader = $request->header('Authorization', null);
-
+        $authService = new AuthenticateService($request);
 
         // Check if Authenticate headers are set and if the base64(username:password) exists
-        if((new AuthenticateService($request))->checkBasicAuth($authHeader) === false) {
+        if($authService->checkBasicAuth($authHeader) === false) {
             return response('Unauthorized.', 401);
         }
+        $authUser = $authService->getAuthenticatedUser();
+
+        $request->request->add(['authUser' => $authUser->accountGUID]);
 
         return $next($request);
     }

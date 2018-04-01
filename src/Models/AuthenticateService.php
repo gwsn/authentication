@@ -1,8 +1,8 @@
 <?php
 namespace Gwsn\Authentication\Models;
 
-use Illuminate\Validation\UnauthorizedException;
 use Log;
+use Illuminate\Validation\UnauthorizedException;
 use Illuminate\Http\Request;
 
 class AuthenticateService {
@@ -12,6 +12,9 @@ class AuthenticateService {
 
     /** @var string*/
     private $pass = null;
+
+    /** @var boolean $authenticated */
+    private $authenticated = false;
 
     /** @var Request $request */
     private $request;
@@ -59,6 +62,26 @@ class AuthenticateService {
         return $this;
     }
 
+    /**
+     * @return Authenticate
+     */
+    public function getAuthenticate()
+    : Authenticate {
+        return $this->authenticate;
+    }
+
+    /**
+     * @param Authenticate $authenticate
+     * @return AuthenticateService
+     */
+    public function setAuthenticate(Authenticate $authenticate)
+    : AuthenticateService {
+        $this->authenticate = $authenticate;
+        return $this;
+    }
+
+
+
 
     /**
      * AuthenticateService constructor.
@@ -79,7 +102,6 @@ class AuthenticateService {
      */
     public function checkLogin(string $user = null, string $pass = null) {
         try {
-
             $this->setUser($user)->setPass($pass);
 
             if($this->authenticate->userLogin($this->getUser(), $this->getPass())) {
@@ -129,11 +151,28 @@ class AuthenticateService {
         return false;
     }
 
+    public function getAuthenticatedUser() {
+        if($this->authenticated === false) {
+            return null;
+        }
+
+        return ( new Account )->where( [
+            ['email', $this->getUser()],
+            ['disabled', 0],
+            ['deleted_at', null],
+        ])->firstOrFail();
+    }
+
 
     /**
      * @param $handler
      * @param $eventData
      */
     private function sendEvent($handler, $eventData) {
+        if($handler === 'authenticate' && array_key_exists('status', $eventData) && $eventData['status'] === true) {
+            $this->authenticated = true;
+        }
+
+        // @todo send event to event service
     }
 }
