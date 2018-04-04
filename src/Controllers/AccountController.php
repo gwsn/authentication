@@ -33,8 +33,8 @@ class AccountController extends BaseController {
         try {
             $authHeader = $request->header('Authorization', null);
 
-            $user = $request->input('email', $request->input('user', null));
-            $pass = $request->input('password', $request->input('pass', null));
+            $user = $request->input('email', $request->input('user', ''));
+            $pass = $request->input('password', $request->input('pass', ''));
 
             $authService = new AuthenticateService($request);
 

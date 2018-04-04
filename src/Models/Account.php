@@ -63,7 +63,6 @@ class Account extends Model {
 
     /**
      * @param string $accountGUID
-     * @param array $data
      *
      * @return array
      * @throws \InvalidArgumentException
@@ -104,7 +103,7 @@ class Account extends Model {
     /**
      * @param string $accountGUID
      *
-     * @return array
+     * @return bool
      * @throws \InvalidArgumentException
      */
     public function deleteAccount( $accountGUID = null ) {
@@ -123,7 +122,7 @@ class Account extends Model {
      * @param string $accountGUID
      * @param array $data
      *
-     * @return array
+     * @return bool
      * @throws \InvalidArgumentException
      */
     public function changePassword( $accountGUID = null, Array $data = [] ) {
@@ -324,7 +323,7 @@ class Account extends Model {
     /**
      * Get the relationships for the entity.
      *
-     * @return array
+     * @return void
      */
     public function getQueueableRelations()
     {

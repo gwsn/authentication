@@ -5,6 +5,10 @@ use Log;
 use Illuminate\Validation\UnauthorizedException;
 use Illuminate\Http\Request;
 
+/**
+ * Class AuthenticateService
+ * @package Gwsn\Authentication\Models
+ */
 class AuthenticateService {
 
     /** @var string */
@@ -95,13 +99,20 @@ class AuthenticateService {
 
 
     /**
+     * Check the login based on user and pass
+     *
      * @param string $user
      * @param string $pass
      *
      * @return bool
      */
-    public function checkLogin(string $user = null, string $pass = null) {
+    public function checkLogin(string $user = '', string $pass = '') {
         try {
+            if(empty($user) || empty($pass)) {
+                $this->sendEvent('authenticate', ['status' => false]);
+                return false;
+            }
+
             $this->setUser($user)->setPass($pass);
 
             if($this->authenticate->userLogin($this->getUser(), $this->getPass())) {
@@ -120,6 +131,8 @@ class AuthenticateService {
 
 
     /**
+     * Check the login based on Basic Auth
+     *
      * @param $authHeader
      *
      * @return bool
@@ -129,8 +142,10 @@ class AuthenticateService {
         $pass = null;
 
         try {
-            if (strpos(strtolower($authHeader),'basic') !== 0)
+            if (strpos(strtolower($authHeader),'basic') !== 0) {
+                $this->sendEvent('authenticate', ['status' => false]);
                 return false;
+            }
 
             list($user, $pass) = explode(':', base64_decode(substr($authHeader, 6)));
 
@@ -151,6 +166,12 @@ class AuthenticateService {
         return false;
     }
 
+
+    /**
+     * Get the authenticated user
+     *
+     * @return null
+     */
     public function getAuthenticatedUser() {
         if($this->authenticated === false) {
             return null;

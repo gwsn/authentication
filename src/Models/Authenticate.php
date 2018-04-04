@@ -1,19 +1,22 @@
 <?php
 namespace Gwsn\Authentication\Models;
 
-
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Validation\UnauthorizedException;
 
+/**
+ * Class Authenticate
+ * @package Gwsn\Authentication\Models
+ */
 class Authenticate {
 
     /**
-     * @param $username
-     * @param $password
+     * @param string $username
+     * @param string $password
      *
      * @return array|bool
      */
-    public function userLogin($username, $password) {
+    public function userLogin(string $username = '', string $password = '') {
 
         try {
             $account = $this->getAccount($username);
@@ -35,7 +38,11 @@ class Authenticate {
         return true;
     }
 
-    private function getAccount($username) {
+    /**
+     * @param string $username
+     * @return mixed
+     */
+    private function getAccount(string $username = '') {
         return ( new Account )->where( [
             ['email', $username],
             ['disabled', 0],
@@ -43,6 +50,10 @@ class Authenticate {
         ])->firstOrFail();
     }
 
+    /**
+     * @param int $timestamp
+     * @return null|string
+     */
     private function getDateTimeFromTimestamp($timestamp = 0) {
         if(!is_integer($timestamp) || $timestamp <= 0) {
             return null;
@@ -54,10 +65,17 @@ class Authenticate {
         return $dateTime->setTimestamp($timestamp)->format('Y-m-d H:i:s');
     }
 
-    public function registerLogin($result) {
+    /**
+     * @param bool $result
+     */
+    public function registerLogin(bool $result) {
         // @todo
     }
-    public function registerAuthentication($result) {
+
+    /**
+     * @param bool $result
+     */
+    public function registerAuthentication(bool $result) {
         // @todo
     }
 }
