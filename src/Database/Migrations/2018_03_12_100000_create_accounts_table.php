@@ -33,6 +33,7 @@ class CreateAccountsTable extends Migration
             $table->string('loginType')->default('basic_auth');
 
             $table->boolean('disabled')->default(false);
+            $table->boolean('verified')->default(false);
 
             $table->softDeletes();
             $table->rememberToken();

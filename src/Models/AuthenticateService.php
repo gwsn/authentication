@@ -166,11 +166,34 @@ class AuthenticateService {
         return false;
     }
 
+    /**
+     * @return bool
+     */
+    public function checkVerified() {
+        try {
+            if ($this->authenticated === false) {
+                throw new \RuntimeException('Authenticated user not found');
+            }
+
+            $account = (new Account)->where([
+                ['email', $this->getUser()],
+                ['verified', 1],
+                ['disabled', 0],
+                ['deleted_at', null],
+            ])->firstOrFail();
+
+            return true;
+        } catch (\RuntimeException $e) {
+            return false;
+        } catch (\Exception $e) {
+            return false;
+        }
+    }
 
     /**
      * Get the authenticated user
      *
-     * @return null
+     * @return Account|null
      */
     public function getAuthenticatedUser() {
         if($this->authenticated === false) {

@@ -5,14 +5,14 @@ use Gwsn\Authentication\Models\Account;
 use Gwsn\Authentication\Models\AuthenticateService;
 use Gwsn\Rest\BaseController;
 use Illuminate\Http\Request;
-use Illuminate\Validation\UnauthorizedException;
-use Symfony\Component\Routing\Exception\MethodNotAllowedException;
+
 
 /**
  * Class AccountController
  * @package Gwsn\Authentication\Controllers
  */
 class AccountController extends BaseController {
+
 
     /** @var Account $account */
     private $account;
@@ -40,7 +40,7 @@ class AccountController extends BaseController {
 
             // Check if Authenticate headers are set and if the base64(username:password) exists
             if($authService->checkBasicAuth($authHeader) === false && $authService->checkLogin($user, $pass) === false) {
-                return response('Unauthorized.', 401);
+                return $this->failedResponse( $request, 'Unauthorized.', 401 );
             }
 
             // Clear response

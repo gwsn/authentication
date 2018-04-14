@@ -3,6 +3,7 @@ namespace Gwsn\Authentication\Models;
 
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 
 /**
@@ -11,7 +12,7 @@ use Illuminate\Database\Eloquent\Model;
  * @package Gwsn\Authentication\Models\Account
  */
 class Account extends Model {
-
+    use SoftDeletes;
 
     protected $table = 'accounts';
 
@@ -22,7 +23,7 @@ class Account extends Model {
      */
     protected $hidden = [
         'id',
-        'password',
+        'password'
     ];
 
     /**
@@ -30,7 +31,7 @@ class Account extends Model {
      *
      * @var array
      */
-    protected $guarded = ['password'];
+    protected $guarded = ['id'];
 
 
     /**
@@ -320,6 +321,7 @@ class Account extends Model {
     private function throwInvalidException( $key = null, $msg = "is not matching the requirements" ) {
         throw new \InvalidArgumentException(  $key  . " => " . $msg, 1 );
     }
+
     /**
      * Get the relationships for the entity.
      *

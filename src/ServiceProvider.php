@@ -33,6 +33,7 @@ class ServiceProvider extends BaseServiceProvider {
         ], 'migrations');
 
         $this->app['router']->aliasMiddleware('authentication' , \Gwsn\Authentication\Middleware\AuthenticationMiddleware::class);
+        $this->app['router']->aliasMiddleware('auth_and_verified' , \Gwsn\Authentication\Middleware\AccountVerifiedMiddleware::class);
     }
 
     /**
