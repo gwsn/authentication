@@ -32,8 +32,13 @@ class ServiceProvider extends BaseServiceProvider {
             __DIR__ . '/Database/Migrations' => $this->app->databasePath() . '/migrations'
         ], 'migrations');
 
-        $this->app['router']->aliasMiddleware('authentication' , \Gwsn\Authentication\Middleware\AuthenticationMiddleware::class);
-        $this->app['router']->aliasMiddleware('auth_and_verified' , \Gwsn\Authentication\Middleware\AccountVerifiedMiddleware::class);
+        $this->loadViewsFrom(__DIR__.'/Resources/views', 'gwsn.authentication');
+
+
+        $this->app['router']->aliasMiddleware('account.auth' , \Gwsn\Authentication\Middleware\AuthenticationMiddleware::class);
+        $this->app['router']->aliasMiddleware('account.email.verified' , \Gwsn\Authentication\Middleware\AccountVerifiedMiddleware::class);
+
+
     }
 
     /**

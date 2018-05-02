@@ -1,7 +1,7 @@
 <?php
 namespace Gwsn\Authentication\Models;
 
-
+use Illuminate\Support\Facades\Mail;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
@@ -58,6 +58,9 @@ class Account extends Model {
         $account->fill($data);
         $account->password = bcrypt($data['password']);
         $account->save();
+
+        // Send email:
+        $this->sendVerifyEmailMail($account);
 
         return $account->toArray();
     }
@@ -320,6 +323,20 @@ class Account extends Model {
      */
     private function throwInvalidException( $key = null, $msg = "is not matching the requirements" ) {
         throw new \InvalidArgumentException(  $key  . " => " . $msg, 1 );
+    }
+
+    private function sendVerifyEmailMail($account) {
+
+        $data = [
+            'address' => env('MAILER_EMAIL', null),
+            'name' => env('MAILER_NAME', null),
+            'subject' => 'Activate your account!',
+            'message' => '',
+            'account' => $account
+        ];
+
+        Mail::to($account->email)->send(new AccountVerifyEmail($data));
+
     }
 
     /**
