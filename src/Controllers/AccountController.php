@@ -185,6 +185,31 @@ class AccountController extends BaseController {
         }
     }
 
+    /**
+     * @param Request $request
+     * @param string  $username
+     *
+     * @return mixed
+     */
+    public function verify( Request $request, $hash ) {
+        try {
+            // Search for the account check the hash and verify
+
+            $response = $this->account->verifyAccount( $hash, $request->all() );
+
+            return $this->response( $request, $response );
+
+        }
+        catch ( \InvalidArgumentException $e ) {
+            return $this->failedResponse( $request, $e->getMessage(), 400 );
+        }
+        catch ( \Exception $e ) {
+            return $this->failedResponse( $request, $e->getMessage(), 500 );
+        }
+
+
+    }
+
 
     /**
      *

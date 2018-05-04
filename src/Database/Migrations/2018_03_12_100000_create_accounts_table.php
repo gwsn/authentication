@@ -32,6 +32,9 @@ class CreateAccountsTable extends Migration
             ## Login type and Basic Auth API token
             $table->string('loginType')->default('basic_auth');
 
+            ## Hash to validate the email
+            $table->string('email_hash')->nullable();
+
             $table->boolean('disabled')->default(false);
             $table->boolean('verified')->default(false);
 

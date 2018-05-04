@@ -93,6 +93,7 @@ class Account extends Model {
         $this->validateAccount( $data );
 
         $account = Account::where('accountGUID', $accountGUID)->where('deleted_at', NULL)->where('disabled', 0);
+
         if($account->count() === 0) {
             throw new \InvalidArgumentException("User not exists");
         }
@@ -144,6 +145,42 @@ class Account extends Model {
 
         return true;
     }
+
+
+
+    /**
+     * @param string $hash
+     * @param array $data
+     *
+     * @return bool
+     * @throws \InvalidArgumentException
+     */
+    public function verifyAccount( $hash = null, Array $data = [] ) {
+        $this->validateHash( $hash );
+
+        $account = Account::where('email_hash', $hash)->where('deleted_at', NULL)->where('disabled', 0);
+
+        if($account->count() !== 1) {
+            throw new \InvalidArgumentException("Account not exists");
+        }
+
+        $account = $account->first();
+
+
+        if($account->verified === true) {
+            throw new \InvalidArgumentException("Account already verified");
+        }
+
+
+        $account->email_hash = null;
+        $account->verified = true;
+        $account->save();
+
+        return true;
+    }
+
+
+
 
     /**
      * @param array $data
@@ -264,6 +301,14 @@ class Account extends Model {
         return true;
     }
 
+    private function validateHash(string $hash):bool {
+        if ( empty( $hash ) ) {
+            $this->throwInvalidException( 'validation hash is empty' );
+            return false;
+        }
+        return true;
+    }
+
     /**
      * Check if the password is a valid password and strong enough
      *
@@ -325,18 +370,28 @@ class Account extends Model {
         throw new \InvalidArgumentException(  $key  . " => " . $msg, 1 );
     }
 
-    private function sendVerifyEmailMail($account) {
+    private function sendVerifyEmailMail(Account $account) {
 
         $data = [
             'address' => env('MAILER_EMAIL', null),
             'name' => env('MAILER_NAME', null),
             'subject' => 'Activate your account!',
             'message' => '',
-            'account' => $account
+            'account' => $account,
+            'hash' => $this->generateVerifyHashUrl($account),
         ];
 
         Mail::to($account->email)->send(new AccountVerifyEmail($data));
 
+    }
+
+    private function generateVerifyHashUrl($account) {
+        $hash = Uuid::create();
+
+        $account->email_hash = $hash;
+        $account->save();
+
+        return env("APP_URL", $_SERVER['SERVER_ADDR'])."/account/{$hash}/verify";
     }
 
     /**
