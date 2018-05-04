@@ -378,7 +378,7 @@ class Account extends Model {
             'subject' => 'Activate your account!',
             'message' => '',
             'account' => $account,
-            'hash' => $this->generateVerifyHashUrl($account),
+            'verify_url' => $this->generateVerifyHashUrl($account),
         ];
 
         Mail::to($account->email)->send(new AccountVerifyEmail($data));

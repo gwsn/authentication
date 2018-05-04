@@ -271,7 +271,7 @@
                                                     <table role="presentation" align="center" cellspacing="0" cellpadding="0" border="0" class="center-on-narrow" style="text-align: center;">
                                                         <tr>
                                                             <td style="border-radius: 50px; background: #26a4d3; text-align: center;" class="button-td">
-                                                                <a href="http://www.google.com" style="background: #26a4d3; border: 15px solid #26a4d3; font-family: 'Montserrat', sans-serif; font-size: 14px; line-height: 1.1; text-align: center; text-decoration: none; display: block; border-radius: 50px; font-weight: bold;" class="button-a" mc:edit="a-0" mc:hideable="a-0">
+                                                                <a href="{{ $data['verify_url'] }}" style="background: #26a4d3; border: 15px solid #26a4d3; font-family: 'Montserrat', sans-serif; font-size: 14px; line-height: 1.1; text-align: center; text-decoration: none; display: block; border-radius: 50px; font-weight: bold;" class="button-a" mc:edit="a-0" mc:hideable="a-0">
                                                                     <span style="color:#ffffff;" class="button-link">&nbsp;&nbsp;&nbsp;&nbsp;Verify Email&nbsp;&nbsp;&nbsp;&nbsp;</span>
                                                                 </a>
                                                             </td>

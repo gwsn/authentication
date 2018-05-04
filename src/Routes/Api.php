@@ -2,7 +2,7 @@
 
 Route::post('/account', 'AccountController@create');
 Route::post('/account/login', 'AccountController@login');
-Route::post('/account/{hash}/verify', 'AccountController@verify'); 
+Route::post('/account/{hash}/verify', 'AccountController@verify');
 
 Route::group(['middleware' => ['account.auth']], function () {
     Route::get('/account/{accountGUID}', 'AccountController@read');
