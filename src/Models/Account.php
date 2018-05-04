@@ -391,7 +391,7 @@ class Account extends Model {
         $account->email_hash = $hash;
         $account->save();
 
-        return env("APP_URL", $_SERVER['SERVER_ADDR'])."/account/{$hash}/verify";
+        return env("WEB_URL", null)."/verify/{$hash}";
     }
 
     /**
