@@ -3,6 +3,7 @@ namespace Gwsn\Authentication\Controllers;
 
 use Gwsn\Authentication\Models\Account;
 use Gwsn\Authentication\Models\AuthenticateService;
+use Gwsn\Authentication\Models\Uuid;
 use Gwsn\Rest\BaseController;
 use Illuminate\Http\Request;
 
@@ -65,6 +66,7 @@ class AccountController extends BaseController {
      * @return mixed
      */
     public function create( Request $request ) {
+
         try {
 
             $response = $this->account->createAccount( $request->except('authUser') );
@@ -212,10 +214,30 @@ class AccountController extends BaseController {
 
 
     /**
+     * Do not use this function
      *
+     * @deprecated
      */
-    public function dummyDataUser() {
+    public function testEmail( Request $request, $username ) {
+        $account = Account::where('accountGUID', $username);
 
+        if($account->count() !== 1) {
+            throw new \InvalidArgumentException("Account not exists");
+        }
+
+        $account = $account->first();
+
+        $data = [
+            'address' => env('MAILER_EMAIL', null),
+            'name' => env('MAILER_NAME', null),
+            'subject' => 'Activate your account!',
+            'message' => '',
+            'account' => $account,
+            'application' => env('APP_NAME', 'New Application'),
+            'verify_url' => env("WEB_URL", null)."/verify/".Uuid::create(),
+        ];
+
+        return view('gwsn-authentication::accounts.verifyEmail', ['data' => $data]);
     }
 
     private function validateUser(Request $request, $username) {

@@ -15,13 +15,11 @@ class AccountVerifyEmail extends Mailable
     public function __construct($data)
     {
         $this->data = $data;
-
-        $this->data['application'] = env('APP_NAME', 'New Application');
     }
 
     public function build()
     {
-        return $this->view('gwsn.authentication::accounts.verifyEmail')
+        return $this->view('gwsn-authentication::accounts.verifyEmail')
             ->from($this->data['address'], $this->data['name'])
             ->replyTo($this->data['address'], $this->data['name'])
             ->subject($this->data['subject'])

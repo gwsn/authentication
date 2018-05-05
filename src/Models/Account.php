@@ -378,6 +378,7 @@ class Account extends Model {
             'subject' => 'Activate your account!',
             'message' => '',
             'account' => $account,
+            'application' => env('APP_NAME', 'New Application'),
             'verify_url' => $this->generateVerifyHashUrl($account),
         ];
 

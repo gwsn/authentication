@@ -1,6 +1,7 @@
 <?php
 
 Route::post('/account', 'AccountController@create');
+Route::get('/account/test/email/{accountGUID}', 'AccountController@testEmail');
 Route::post('/account/login', 'AccountController@login');
 Route::post('/account/{hash}/verify', 'AccountController@verify');
 

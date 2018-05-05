@@ -32,7 +32,11 @@ class ServiceProvider extends BaseServiceProvider {
             __DIR__ . '/Database/Migrations' => $this->app->databasePath() . '/migrations'
         ], 'migrations');
 
-        $this->loadViewsFrom(__DIR__.'/Resources/views', 'gwsn.authentication');
+        $this->publishes([
+            __DIR__.'/Resources/views' => base_path('resources/views/vendor/gwsn-authentication')
+        ], 'view');
+
+        $this->loadViewsFrom(__DIR__.'/Resources/views', 'gwsn-authentication');
 
 
         $this->app['router']->aliasMiddleware('account.auth' , \Gwsn\Authentication\Middleware\AuthenticationMiddleware::class);
