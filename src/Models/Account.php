@@ -75,7 +75,7 @@ class Account extends Model {
         $account = Account::where('accountGUID', $accountGUID)->where('deleted_at', NULL)->where('disabled', 0);
 
         if($account->count() > 0) {
-            return $account;
+            return $account->first();
         }
 
         return [];
